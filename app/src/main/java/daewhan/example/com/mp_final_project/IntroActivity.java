@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 
 public class IntroActivity extends Activity{
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

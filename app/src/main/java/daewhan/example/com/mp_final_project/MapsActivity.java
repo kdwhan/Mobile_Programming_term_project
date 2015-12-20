@@ -1,9 +1,13 @@
 package daewhan.example.com.mp_final_project;
 
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,19 +21,35 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
-
+    //MAP
     private GoogleMap mMap;
     private Button bt_save;
     private EditText et_text;
+
+    static double mlat, mlng;
+
+    //database 객체들
+    SQLiteDatabase db;
+    String dbName = "idList.db";
+    String tableName = "idListTable";
+    int dbMode = Context.MODE_PRIVATE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        //Database 열기
+        db = openOrCreateDatabase(dbName, dbMode, null);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+
+        //edit text
+        et_text = (EditText)findViewById(R.id.et_feel);
 
 
         //저장 버튼
@@ -39,14 +59,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onClick(View v) {
                 Toast.makeText(getApplicationContext(), "저장됨", Toast.LENGTH_LONG).show();
 
-                Intent intent = new Intent(MapsActivity.this, SavedListActivity.class);
-                startActivity(intent);
+                String name = et_text.getText().toString();
+                insertData(name);
             }
         });
 
-        //edit text
-        et_text = (EditText)findViewById(R.id.et_text);
-        
 
         //MyLocation.java의 추상클래스 구현
         MyLocation.LocationResult locationResult = new MyLocation.LocationResult() {
@@ -63,11 +80,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-
     private void drawMarker(Location location) {
         mMap.clear();//기존 마커 지우기
 
-        LatLng currentPosition = new LatLng(location.getLatitude(), location.getLongitude());
+        mlat = location.getLatitude();
+        mlng = location.getLongitude();
+
+        LatLng currentPosition = new LatLng(mlat, mlng);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPosition, 17));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(17), 2000, null);
 
@@ -97,4 +116,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.addMarker(new MarkerOptions().position(SEOUL).title("Marker in Seoul"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(SEOUL));
     }
+
+
+    // Data 추가
+    public void insertData(String name) {
+        String sql = "insert into " + tableName + "(name, lat, lng) values( '" + name + "', '" +mlat+"', '"+mlng+"' )";
+        db.execSQL(sql);
+    }
 }
+

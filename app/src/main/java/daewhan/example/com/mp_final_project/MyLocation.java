@@ -1,6 +1,7 @@
 package daewhan.example.com.mp_final_project;
 /**
  * Created by daewhan on 2015-12-11.
+ * 내 좌표를 handling 하는 class
  */
 import android.content.Context;
 import android.location.Location;
